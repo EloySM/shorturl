@@ -26,7 +26,7 @@ function anonymizeIp(ip: string): string {
 
 export async function GET(
   request: Request,
-  { params }: { params: { short_code: string } }
+  { params }: { params: Promise<{ short_code: string }> }
 ) {
   // 1. Extraemos el código de la URL
   const { short_code } = await params

@@ -1,32 +1,33 @@
 import { LinkRepository } from "../../domain/repositories/link.repository";
 import { Link } from "../../domain/entities/link.entity";
 import { prisma } from "../db/prisma-client";
+import { safeCatch } from "@/lib/utils/promise";
 
 export class PrismaLinkRepository implements LinkRepository {
   
   async save(link: Link): Promise<Link> {
     const data = link.toPersistence();
     
-    await prisma.link.upsert({
+    await prisma.links.upsert({
       where: { id: data.id },
       update: {
-        shortCode: data.shortCode,
-        originalUrl: data.originalUrl,
-        expiresAt: data.expiresAt,
-        passQueryParams: data.passQueryParams,
-        linkCloaking: data.linkCloaking,
-        isUnsafe: data.isUnsafe,
+        short_code: data.shortCode,
+        original_url: data.originalUrl,
+        expires_at: data.expiresAt,
+        pass_query_params: data.passQueryParams,
+        link_cloaking: data.linkCloaking,
+        is_unsafe: data.isUnsafe,
       },
       create: {
         id: data.id,
-        shortCode: data.shortCode,
-        originalUrl: data.originalUrl,
-        organizationId: data.organizationId,
-        creatorId: data.creatorId,
-        expiresAt: data.expiresAt,
-        passQueryParams: data.passQueryParams,
-        linkCloaking: data.linkCloaking,
-        isUnsafe: data.isUnsafe,
+        short_code: data.shortCode,
+        original_url: data.originalUrl,
+        organization_id: data.organizationId,
+        creator_id: data.creatorId,
+        expires_at: data.expiresAt,
+        pass_query_params: data.passQueryParams,
+        link_cloaking: data.linkCloaking,
+        is_unsafe: data.isUnsafe,
       }
     });
     
@@ -34,29 +35,31 @@ export class PrismaLinkRepository implements LinkRepository {
   }
 
   async findByCode(code: string): Promise<Link | null> {
-    const record = await prisma.link.findUnique({
-      where: { shortCode: code }
+    const record = await prisma.links.findUnique({
+      where: { short_code: code }
     });
     
     if (!record) return null;
 
     return new Link({
       id: record.id,
-      shortCode: record.shortCode,
-      originalUrl: record.originalUrl,
-      organizationId: record.organizationId,
-      creatorId: record.creatorId,
-      expiresAt: record.expiresAt,
-      createdAt: record.createdAt,
+      shortCode: record.short_code,
+      originalUrl: record.original_url,
+      organizationId: record.organization_id ?? '',
+      creatorId: record.creator_id,
+      expiresAt: record.expires_at,
+      createdAt: record.created_at ?? new Date(),
       settings: {
-        passQueryParams: record.passQueryParams,
-        linkCloaking: record.linkCloaking,
-        isUnsafe: record.isUnsafe
+        passQueryParams: record.pass_query_params ?? false,
+        linkCloaking: record.link_cloaking ?? false,
+        isUnsafe: record.is_unsafe ?? false
       }
     });
   }
 
   async delete(id: string): Promise<void> {
-    await prisma.link.delete({ where: { id } });
+    await safeCatch(
+      prisma.links.delete({ where: { id } })
+    )
   }
 }

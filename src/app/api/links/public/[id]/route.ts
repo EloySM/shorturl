@@ -4,11 +4,12 @@ import { safeCatch } from "@/lib/utils/promise";
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  
   const [deleted, error] = await safeCatch(
     prisma.links.delete({
-      where: { id: params.id }
+      where: { id: (await params).id }
     })
   )
 

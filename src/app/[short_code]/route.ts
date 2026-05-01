@@ -48,6 +48,8 @@ export async function GET(
     return NextResponse.redirect(new URL('/', request.url))
   }
 
+  const activeLink = link
+
   const rawIp = headerList.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1'
   const ipHash = hashIp(rawIp)
   const cleanIp = anonymizeIp(ipHash)
@@ -80,7 +82,7 @@ export async function GET(
   await safeCatch(
     prisma.clicks.create({
       data: { 
-        link_id: link.id,
+        link_id: activeLink.id,
         ip_hash: ipHash,
         ip_display: cleanIp,
         continent: headerList.get('x-vercel-ip-continent'),
